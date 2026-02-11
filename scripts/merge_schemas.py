@@ -27,10 +27,15 @@ urllib.request.urlretrieve(
     "ghl_schema/contacts.json",
 )
 
+from typing import Any
+
 # Merge specs
+
 print("Merging OpenAPI specs...")
-custom_fields = json.loads(Path("ghl_schema/custom-fields.json").read_text())
-contacts = json.loads(Path("ghl_schema/contacts.json").read_text())
+
+custom_fields: dict[str, Any] = json.loads(Path("ghl_schema/custom-fields.json").read_text())
+
+contacts: dict[str, Any] = json.loads(Path("ghl_schema/contacts.json").read_text())
 
 
 def snake_to_camel(snake_str):
@@ -101,17 +106,17 @@ def fix_property_keys(obj):
 
 # Fix property keys in contacts schema and apply manual adjustments
 print("Converting snake_case properties to camelCase in contacts schema...")
-contacts = fix_property_keys(contacts)
+contacts = fix_property_keys(contacts)  # type: ignore
 
 print("Applying manual schema adjustments to contacts schema...")
-contacts = apply_manual_adjustments(contacts)
+contacts = apply_manual_adjustments(contacts)  # type: ignore
 
 # Save the updated contacts.json with camelCase properties and manual adjustments
 Path("ghl_schema/contacts.json").write_text(json.dumps(contacts, indent=2))
 print("Updated contacts.json with camelCase properties and manual adjustments")
 
 # Start with custom-fields as base
-merged = custom_fields.copy()
+merged: dict[str, Any] = custom_fields.copy()
 
 # Merge paths
 merged["paths"].update(contacts.get("paths", {}))
