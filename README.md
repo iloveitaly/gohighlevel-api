@@ -1,7 +1,6 @@
 # GoHighLevel API Client
-Connect to the GoHighLevel API with a modern, type-safe Python client
 
-Managing integrations with CRMs like GoHighLevel can be a headache when you're dealing with raw HTTP requests. I built this client to make interacting with GoHighLevel's API feel native to Python developers. It handles the heavy lifting of authentication, data modeling, and request parsing so you can focus on building your business logic.
+Connect to the GoHighLevel API with a modern, type-safe Python client. This is auto generated based on a API spec which I believe I had an LLM generate. There are probably some bugs, but it's working for me.
 
 Right now, this client focuses on the Contacts and Custom Fields endpoints, giving you typed interfaces for the data you use most often.
 
