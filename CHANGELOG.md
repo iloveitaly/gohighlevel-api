@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/iloveitaly/gohighlevel-api/compare/v0.1.0...v0.2.0) (2026-02-11)
+
+
+### Features
+
+* initial release ([2935c14](https://github.com/iloveitaly/gohighlevel-api/commit/2935c14d1043d0626163f5162088d5f016ce4837))
+
 ## 0.1.0 (2026-02-11)
 
 
