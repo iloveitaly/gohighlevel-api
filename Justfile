@@ -36,9 +36,11 @@ generate: download_merge_schemas
     uvx openapi-python-client@latest generate \
         --path ./ghl_schema/combined.yaml \
         --meta uv \
+        --config openapi-config.yaml \
         --output-path build/gen \
         --overwrite
-    cp -r build/gen/ghl_client .
+    rm -rf ghl_client
+    cp -r build/gen/gohighlevel_api .
     cp build/gen/pyproject.toml .
     cp build/gen/README.md .
     rm -rf build/gen

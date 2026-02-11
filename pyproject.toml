@@ -1,6 +1,6 @@
 [project]
-name = "ghl-client"
-version = "1.0"
+name = "gohighlevel-api"
+version = "0.1.0"
 description = "A client library for accessing ghl"
 authors = []
 requires-python = ">=3.10"
@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [tool.uv.build-backend]
-module-name = "ghl_client"
+module-name = "gohighlevel_api"
 module-root = ""
 
 [build-system]
