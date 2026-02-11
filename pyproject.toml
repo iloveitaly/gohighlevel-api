@@ -1,6 +1,6 @@
 [project]
 name = "gohighlevel-api"
-version = "0.1.0"
+version = "0.2.0"
 description = "A modern Python client for the GoHighLevel API, focusing on contacts and custom fields."
 keywords = ["gohighlevel", "crm", "api", "client"]
 authors = []
