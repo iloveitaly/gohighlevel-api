@@ -1,0 +1,227 @@
+from __future__ import annotations
+
+import datetime
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+from dateutil.parser import isoparse
+
+from ..models.i_custom_field_accepted_formats import ICustomFieldAcceptedFormats
+from ..models.i_custom_field_data_type import ICustomFieldDataType
+from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.option_dto import OptionDTO
+
+
+T = TypeVar("T", bound="ICustomField")
+
+
+@_attrs_define
+class ICustomField:
+    """
+    Attributes:
+        data_type (ICustomFieldDataType): Type of field that you are trying to create
+        date_added (datetime.datetime): Date and time when the object was added
+        date_updated (datetime.datetime): Date and time when the object was last updated
+        field_key (str): Field key. For Custom Object it's formatted as "custom_object.{objectKey}.{fieldKey}".
+            "custom_object" is a fixed prefix, "{objectKey}" is your custom object's identifier, and "{fieldName}" is the
+            unique field name within that object. Example: "custom_object.pet.name" for a "name" field in a "pet" custom
+            object. Example: custom_object.pet.name.
+        id (str): Unique identifier of the object
+        location_id (str): Location Id Example: ve9EPM428h8vShlRW1KT.
+        object_key (str): The key for your custom / standard object. This key uniquely identifies the custom object.
+            Example: "custom_object.pet" for a custom object related to pets. Example: custom_object.pet.
+        parent_id (str): ID of the parent folder Example: 3v34PM428h8vShlRW1KT.
+        show_in_forms (bool): Whether the field should be shown in forms
+        accepted_formats (ICustomFieldAcceptedFormats | Unset): Allowed file formats for uploads. Options include: .pdf,
+            .docx, .doc, .jpg, .jpeg, .png, .gif, .csv, .xlsx, .xls, all
+        allow_custom_option (bool | Unset): Determines if users can add a custom option value different from the
+            predefined options in records for RADIO type fields. A custom value added in one record does not automatically
+            become an option and will not appear as an option for other records. Example: True.
+        description (str | Unset): Description of the field
+        max_file_limit (float | Unset): Maximum file limit for uploads Example: 2.
+        name (str | Unset): Field name Example: Name.
+        options (list[OptionDTO] | Unset): Options for the field (Optional, valid only for SINGLE_OPTIONS,
+            MULTIPLE_OPTIONS, RADIO, CHECKBOX, TEXTBOX_LIST type)
+        placeholder (str | Unset): Placeholder text for the field
+    """
+
+    data_type: ICustomFieldDataType
+    date_added: datetime.datetime
+    date_updated: datetime.datetime
+    field_key: str
+    id: str
+    location_id: str
+    object_key: str
+    parent_id: str
+    show_in_forms: bool
+    accepted_formats: ICustomFieldAcceptedFormats | Unset = UNSET
+    allow_custom_option: bool | Unset = UNSET
+    description: str | Unset = UNSET
+    max_file_limit: float | Unset = UNSET
+    name: str | Unset = UNSET
+    options: list[OptionDTO] | Unset = UNSET
+    placeholder: str | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        data_type = self.data_type.value
+
+        date_added = self.date_added.isoformat()
+
+        date_updated = self.date_updated.isoformat()
+
+        field_key = self.field_key
+
+        id = self.id
+
+        location_id = self.location_id
+
+        object_key = self.object_key
+
+        parent_id = self.parent_id
+
+        show_in_forms = self.show_in_forms
+
+        accepted_formats: str | Unset = UNSET
+        if not isinstance(self.accepted_formats, Unset):
+            accepted_formats = self.accepted_formats.value
+
+        allow_custom_option = self.allow_custom_option
+
+        description = self.description
+
+        max_file_limit = self.max_file_limit
+
+        name = self.name
+
+        options: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.options, Unset):
+            options = []
+            for options_item_data in self.options:
+                options_item = options_item_data.to_dict()
+                options.append(options_item)
+
+        placeholder = self.placeholder
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "dataType": data_type,
+                "dateAdded": date_added,
+                "dateUpdated": date_updated,
+                "fieldKey": field_key,
+                "id": id,
+                "locationId": location_id,
+                "objectKey": object_key,
+                "parentId": parent_id,
+                "showInForms": show_in_forms,
+            }
+        )
+        if accepted_formats is not UNSET:
+            field_dict["acceptedFormats"] = accepted_formats
+        if allow_custom_option is not UNSET:
+            field_dict["allowCustomOption"] = allow_custom_option
+        if description is not UNSET:
+            field_dict["description"] = description
+        if max_file_limit is not UNSET:
+            field_dict["maxFileLimit"] = max_file_limit
+        if name is not UNSET:
+            field_dict["name"] = name
+        if options is not UNSET:
+            field_dict["options"] = options
+        if placeholder is not UNSET:
+            field_dict["placeholder"] = placeholder
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.option_dto import OptionDTO
+
+        d = dict(src_dict)
+        data_type = ICustomFieldDataType(d.pop("dataType"))
+
+        date_added = isoparse(d.pop("dateAdded"))
+
+        date_updated = isoparse(d.pop("dateUpdated"))
+
+        field_key = d.pop("fieldKey")
+
+        id = d.pop("id")
+
+        location_id = d.pop("locationId")
+
+        object_key = d.pop("objectKey")
+
+        parent_id = d.pop("parentId")
+
+        show_in_forms = d.pop("showInForms")
+
+        _accepted_formats = d.pop("acceptedFormats", UNSET)
+        accepted_formats: ICustomFieldAcceptedFormats | Unset
+        if isinstance(_accepted_formats, Unset):
+            accepted_formats = UNSET
+        else:
+            accepted_formats = ICustomFieldAcceptedFormats(_accepted_formats)
+
+        allow_custom_option = d.pop("allowCustomOption", UNSET)
+
+        description = d.pop("description", UNSET)
+
+        max_file_limit = d.pop("maxFileLimit", UNSET)
+
+        name = d.pop("name", UNSET)
+
+        _options = d.pop("options", UNSET)
+        options: list[OptionDTO] | Unset = UNSET
+        if _options is not UNSET:
+            options = []
+            for options_item_data in _options:
+                options_item = OptionDTO.from_dict(options_item_data)
+
+                options.append(options_item)
+
+        placeholder = d.pop("placeholder", UNSET)
+
+        i_custom_field = cls(
+            data_type=data_type,
+            date_added=date_added,
+            date_updated=date_updated,
+            field_key=field_key,
+            id=id,
+            location_id=location_id,
+            object_key=object_key,
+            parent_id=parent_id,
+            show_in_forms=show_in_forms,
+            accepted_formats=accepted_formats,
+            allow_custom_option=allow_custom_option,
+            description=description,
+            max_file_limit=max_file_limit,
+            name=name,
+            options=options,
+            placeholder=placeholder,
+        )
+
+        i_custom_field.additional_properties = d
+        return i_custom_field
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties
