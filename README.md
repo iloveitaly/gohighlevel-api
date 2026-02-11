@@ -1,83 +1,116 @@
-# gohighlevel-api
-A client library for accessing ghl
+# GoHighLevel API Client
+Connect to the GoHighLevel API with a modern, type-safe Python client
 
-## Usage
-First, create a client:
+Managing integrations with CRMs like GoHighLevel can be a headache when you're dealing with raw HTTP requests. I built this client to make interacting with GoHighLevel's API feel native to Python developers. It handles the heavy lifting of authentication, data modeling, and request parsing so you can focus on building your business logic.
 
-```python
-from gohighlevel_api import Client
+Right now, this client focuses on the Contacts and Custom Fields endpoints, giving you typed interfaces for the data you use most often.
 
-client = Client(base_url="https://api.example.com")
+## Installation
+Add this package to your project using `uv`:
+
+```bash
+uv add gohighlevel-api
 ```
 
-If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
+## Usage
+I've designed the client to be intuitive. You just need your API token (or Location API Key) to get started.
 
 ```python
 from gohighlevel_api import AuthenticatedClient
+from gohighlevel_api.api.contacts import get_contacts
+from gohighlevel_api.models import GetContactsVersion
 
-client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSecretToken")
+# Initialize the client with your API key
+client = AuthenticatedClient(
+    base_url="https://services.leadconnectorhq.com",
+    token="YOUR_ACCESS_TOKEN"
+)
+
+# Fetch contacts with type safety
+with client as c:
+    response = get_contacts.sync(client=c, location_id="YOUR_LOCATION_ID")
+    
+    if response:
+        print(f"Found {len(response.contacts)} contacts")
+        for contact in response.contacts:
+            print(f"{contact.first_name} {contact.last_name}")
 ```
 
-Now call your endpoint and use your models:
+For async applications, it works just as smoothly:
 
 ```python
-from gohighlevel_api.models import MyDataModel
-from gohighlevel_api.api.my_tag import get_my_data_model
-from gohighlevel_api.types import Response
+import asyncio
+from gohighlevel_api import AuthenticatedClient
+from gohighlevel_api.api.contacts import get_contacts
 
-with client as client:
-    my_data: MyDataModel = get_my_data_model.sync(client=client)
-    # or if you need more info (e.g. status_code)
-    response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
+async def main():
+    client = AuthenticatedClient(
+        base_url="https://services.leadconnectorhq.com",
+        token="YOUR_ACCESS_TOKEN"
+    )
+
+    async with client as c:
+        response = await get_contacts.asyncio(client=c, location_id="YOUR_LOCATION_ID")
+        # Work with your data...
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-Or do the same thing with an async version:
+## Key Concepts
+
+To use this client effectively, here are a few things to know about how the API is structured:
+
+1.  **Module Structure**: Every API endpoint (path + method) becomes a Python module with four functions:
+    *   `sync`: Blocking request that returns parsed data (if successful) or `None`.
+    *   `sync_detailed`: Blocking request that returns a `Response` object (with status code, headers, etc.).
+    *   `asyncio`: Async version of `sync`.
+    *   `asyncio_detailed`: Async version of `sync_detailed`.
+2.  **Arguments**: All path parameters, query parameters, and request bodies become arguments to these methods.
+3.  **Tags**: If an endpoint has tags in the OpenAPI spec, the first tag is used as the module name (e.g., `api.contacts`). Endpoints without tags end up in `api.default`.
+
+## Advanced Usage
+
+### Detailed Responses
+Sometimes you need more than just the parsed data—like headers or status codes.
 
 ```python
-from gohighlevel_api.models import MyDataModel
-from gohighlevel_api.api.my_tag import get_my_data_model
+from gohighlevel_api.api.contacts import get_contacts
 from gohighlevel_api.types import Response
 
-async with client as client:
-    my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
-    response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
+with client as c:
+    # returns a Response object containing status_code, content, headers, and parsed data
+    response: Response = get_contacts.sync_detailed(client=c, location_id="YOUR_LOCATION_ID")
+    
+    if response.status_code == 200:
+        print(response.parsed)
 ```
 
-By default, when you're calling an HTTPS API it will attempt to verify that SSL is working correctly. Using certificate verification is highly recommended most of the time, but sometimes you may need to authenticate to a server (especially an internal server) using a custom certificate bundle.
+### SSL Configuration
+By default, the client verifies SSL certificates. However, if you are testing against a local server or need a custom certificate bundle, you can configure this:
 
+**Custom Certificate Bundle:**
 ```python
 client = AuthenticatedClient(
-    base_url="https://internal_api.example.com", 
+    base_url="https://internal.api.example.com", 
     token="SuperSecretToken",
     verify_ssl="/path/to/certificate_bundle.pem",
 )
 ```
 
-You can also disable certificate validation altogether, but beware that **this is a security risk**.
-
+**Disable Verification (Security Risk):**
 ```python
 client = AuthenticatedClient(
-    base_url="https://internal_api.example.com", 
+    base_url="https://internal.api.example.com", 
     token="SuperSecretToken", 
     verify_ssl=False
 )
 ```
 
-Things to know:
-1. Every path/method combo becomes a Python module with four functions:
-    1. `sync`: Blocking request that returns parsed data (if successful) or `None`
-    1. `sync_detailed`: Blocking request that always returns a `Request`, optionally with `parsed` set if the request was successful.
-    1. `asyncio`: Like `sync` but async instead of blocking
-    1. `asyncio_detailed`: Like `sync_detailed` but async instead of blocking
+### Customizing the HTTP Client
+You have full control over the underlying `httpx` client. This is useful for adding event hooks, logging, or setting proxies.
 
-1. All path/query params, and bodies become method arguments.
-1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
-1. Any endpoint which did not have a tag will be in `gohighlevel_api.api.default`
-
-## Advanced customizations
-
-There are more settings on the generated `Client` class which let you control more runtime behavior, check out the docstring on that class for more info. You can also customize the underlying `httpx.Client` or `httpx.AsyncClient` (depending on your use-case):
-
+**Using arguments:**
 ```python
 from gohighlevel_api import Client
 
@@ -92,11 +125,10 @@ client = Client(
     base_url="https://api.example.com",
     httpx_args={"event_hooks": {"request": [log_request], "response": [log_response]}},
 )
-
-# Or get the underlying httpx client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
 ```
 
-You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
+**Replacing the client entirely:**
+You can also supply your own `httpx.Client`. Note that this overrides configuration passed to the constructor (like `base_url`).
 
 ```python
 import httpx
@@ -105,19 +137,19 @@ from gohighlevel_api import Client
 client = Client(
     base_url="https://api.example.com",
 )
-# Note that base_url needs to be re-set, as would any shared cookies, headers, etc.
-client.set_httpx_client(httpx.Client(base_url="https://api.example.com", proxies="http://localhost:8030"))
+
+# Note that base_url needs to be re-set here
+client.set_httpx_client(httpx.Client(
+    base_url="https://api.example.com", 
+    proxies="http://localhost:8030"
+))
 ```
 
-## Building / publishing this package
-This project uses [uv](https://github.com/astral-sh/uv) to manage dependencies and packaging. Here are the basics:
-1. Update the metadata in `pyproject.toml` (e.g. authors, version).
-2. If you're using a private repository: https://docs.astral.sh/uv/guides/integration/alternative-indexes/
-3. Build a distribution with `uv build`, builds `sdist` and `wheel` by default.
-1. Publish the client with `uv publish`, see documentation for publishing to private indexes.
+## Features
+*   **Type-safe Models:** Every request and response is validated against generated Pydantic-style models.
+*   **Sync and Async:** Native support for both blocking and `asyncio` workflows.
+*   **Selective Schema:** focused coverage for Contacts and Custom Fields to keep the package lightweight.
+*   **Auto-generated:** Built directly from GoHighLevel's OpenAPI specs, ensuring accuracy.
+*   **Modern Tooling:** Built with `uv` for fast, reliable package management.
 
-If you want to install this client into another project without publishing it (e.g. for development) then:
-1. If that project **is using uv**, you can simply do `uv add <path-to-this-client>` from that project
-1. If that project is not using uv:
-    1. Build a wheel with `uv build --wheel`.
-    1. Install that wheel from the other project `pip install <path-to-wheel>`.
+## [MIT License](LICENSE.md)

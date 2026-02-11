@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 import json
-import yaml
-from pathlib import Path
 import urllib.request
+from pathlib import Path
+
+import yaml
 from jsonpath_ng import parse
 
 # Manual JSON schema adjustments
 MANUAL_ADJUSTMENTS = [
-    {
-        "path": "$.components.schemas.AttributionSource.properties.url",
-        "updates": {"nullable": True}
-    },
-    {
-        "path": "$.components.schemas.AttributionSource.required",
-        "updates": {"remove_item": "url"}
-    }
+    {"path": "$.components.schemas.AttributionSource.properties.url", "updates": {"nullable": True}},
+    {"path": "$.components.schemas.AttributionSource.required", "updates": {"remove_item": "url"}},
 ]
 
 # Create directory and download files
@@ -23,13 +18,13 @@ Path("ghl_schema").mkdir(exist_ok=True)
 print("Downloading custom-fields.json...")
 urllib.request.urlretrieve(
     "https://raw.githubusercontent.com/GoHighLevel/highlevel-api-docs/main/apps/custom-fields.json",
-    "ghl_schema/custom-fields.json"
+    "ghl_schema/custom-fields.json",
 )
 
 print("Downloading contacts.json...")
 urllib.request.urlretrieve(
-    "https://raw.githubusercontent.com/GoHighLevel/highlevel-api-docs/main/apps/contacts.json", 
-    "ghl_schema/contacts.json"
+    "https://raw.githubusercontent.com/GoHighLevel/highlevel-api-docs/main/apps/contacts.json",
+    "ghl_schema/contacts.json",
 )
 
 # Merge specs
@@ -37,22 +32,24 @@ print("Merging OpenAPI specs...")
 custom_fields = json.loads(Path("ghl_schema/custom-fields.json").read_text())
 contacts = json.loads(Path("ghl_schema/contacts.json").read_text())
 
+
 def snake_to_camel(snake_str):
     """Convert snake_case to camelCase"""
-    components = snake_str.split('_')
-    return components[0] + ''.join(word.capitalize() for word in components[1:])
+    components = snake_str.split("_")
+    return components[0] + "".join(word.capitalize() for word in components[1:])
+
 
 def apply_manual_adjustments(data):
     """Apply manual JSON schema adjustments using JSONPath"""
     for adjustment in MANUAL_ADJUSTMENTS:
         jsonpath_expr = parse(adjustment["path"])
         matches = jsonpath_expr.find(data)
-        
+
         if matches:
             for match in matches:
                 target = match.value
                 updates = adjustment["updates"]
-                
+
                 # Handle special case: removing item from list
                 if "remove_item" in updates:
                     if isinstance(target, list):
@@ -64,7 +61,7 @@ def apply_manual_adjustments(data):
                             print(f"  Warning: '{item_to_remove}' not found in {adjustment['path']}")
                     else:
                         print(f"  Warning: {adjustment['path']} is not a list, cannot remove item")
-                
+
                 # Handle regular dict updates
                 elif isinstance(target, dict):
                     target.update(updates)
@@ -73,8 +70,9 @@ def apply_manual_adjustments(data):
                     print(f"  Warning: {adjustment['path']} is not a dict, skipping")
         else:
             print(f"  Warning: {adjustment['path']} not found in schema")
-    
+
     return data
+
 
 # some keys are reported as snake_case from the API, but are actually camelCase
 def fix_property_keys(obj):
@@ -92,13 +90,14 @@ def fix_property_keys(obj):
                 else:
                     new_properties[key] = fix_property_keys(value)
             obj["properties"] = new_properties
-        
+
         # Recursively process other dict values
         return {k: fix_property_keys(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [fix_property_keys(item) for item in obj]
     else:
         return obj
+
 
 # Fix property keys in contacts schema and apply manual adjustments
 print("Converting snake_case properties to camelCase in contacts schema...")
