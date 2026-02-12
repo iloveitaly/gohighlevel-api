@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/iloveitaly/gohighlevel-api/compare/v0.2.0...v0.2.1) (2026-02-12)
+
+
+### Bug Fixes
+
+* add id-token write permission for publish job ([157ff0e](https://github.com/iloveitaly/gohighlevel-api/commit/157ff0e33d9bbad3cafa2b57c6731706fe5f4507))
+
 ## [0.2.0](https://github.com/iloveitaly/gohighlevel-api/compare/v0.1.0...v0.2.0) (2026-02-11)
 
 
